@@ -34,7 +34,10 @@ public class MemberApiController {
     return new CreateMemberResponse(id);
   }
 
-
+  /**
+   * @별도의 DTO를 세팅하는 장점
+   * @- 데이터 계층과 프레젠테이션 계층을 분리할 수 있다.
+   */
   @PostMapping("/api/v2/members")
   public CreateMemberResponse saveMemberV2(@RequestBody @Valid CreateMemberRequest request) {
     Member member = new Member();
