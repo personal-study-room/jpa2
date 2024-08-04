@@ -1,6 +1,7 @@
 package lecture.jpa2.api;
 
 import jakarta.validation.Valid;
+import lecture.jpa2.domain.Address;
 import lecture.jpa2.domain.Member;
 import lecture.jpa2.service.MemberService;
 import lombok.AllArgsConstructor;
@@ -9,10 +10,48 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class MemberApiController {
   private final MemberService memberService;
+
+  /**
+   * @Entity리턴의 문제점
+   * @- 기본적으로 무시하고 싶은 필드를 @JsonIgnore해주면 되지만, api 스펙에 따라서 entity가 자주 변경이 되어야 한다.
+   * @- 하나의 Entity클래스가 모든 api 스펙에 맞출 수 없다.
+   */
+  @GetMapping("api/v1/members")
+  public List<Member> membersV1() {
+    return memberService.findMembers();
+  }
+
+
+  @GetMapping("/api/v2/members")
+  public Result membersV2() {
+    List<Member> members = memberService.findMembers();
+
+    List<MemberDTO> collect = members.stream()
+            .map(member -> new MemberDTO(member.getName()))
+            .toList();
+
+    return new Result(collect, collect.size());
+  }
+
+  @Data
+  @AllArgsConstructor
+  static class Result<T> {
+    private T data;
+    private int count;
+  }
+
+
+  @Data
+  @AllArgsConstructor
+  static class MemberDTO {
+    private String name;
+  }
 
   /**
    * @등록 V1: 요청 값으로 Member 엔티티를 직접 받는다.
@@ -40,6 +79,7 @@ public class MemberApiController {
   public CreateMemberResponse saveMemberV2(@RequestBody @Valid CreateMemberRequest request) {
     Member member = new Member();
     member.setName(request.getName());
+    member.setAddress(request.getAddress());
 
     Long id = memberService.join(member);
     return new CreateMemberResponse(id);
@@ -66,6 +106,7 @@ public class MemberApiController {
   @NoArgsConstructor
   public static class CreateMemberRequest {
     private String name;
+    private Address address;
   }
 
   @Data
