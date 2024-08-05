@@ -33,6 +33,9 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // 지연로딩인 경우, 프록시 초기화 예외를 막아주는 방법이 필요. => 해당 라이브러리가 해준다
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5-jakarta'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     // 테스트 의존성 추가
     testCompileOnly 'org.projectlombok:lombok'
