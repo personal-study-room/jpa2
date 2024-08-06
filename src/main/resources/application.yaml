@@ -15,5 +15,5 @@ spring:
     properties:
       hibernate:
         format_sql: true
-#        default_batch_fetch_size: 1000 # \uCD5C\uC801\uD654 \uC635\uC158
+#        default_batch_fetch_size: 10
         show_sql: true

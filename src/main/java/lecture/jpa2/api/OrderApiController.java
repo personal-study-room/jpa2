@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public class OrderApiController {
 
 
   @GetMapping("/v1/orders")
-  public List<Order> orderV1(){
+  public List<Order> orderV1() {
     // 1번
     List<Order> all = orderRepository.findAllByString(new OrderSearch());
 
@@ -43,7 +44,7 @@ public class OrderApiController {
 
 
   @GetMapping("/v2/orders")
-  public List<OrderDTO> orderV2(){
+  public List<OrderDTO> orderV2() {
     // 1번
     List<Order> orders = orderRepository.findAllByString(new OrderSearch());
 
@@ -59,7 +60,7 @@ public class OrderApiController {
    * @- 현재 spring 3.xx 부터는 hibernate6를 사용하고 있는데, fetch join 시에 이렇게 데이터 중복 문제을 알아서 해결하도록 고안되어 나오고 있다.
    */
   @GetMapping("/v3/orders")
-  public List<OrderDTO> orderV3(){
+  public List<OrderDTO> orderV3() {
 
     List<Order> orders = orderRepository.findAllWithItem();
 
@@ -67,7 +68,7 @@ public class OrderApiController {
     //order ref= lecture.jpa2.domain.Order@652e9703 id=2
 
     for (Order order : orders) {
-      System.out.println("order ref= " + order + " id=" + order.getId()) ;
+      System.out.println("order ref= " + order + " id=" + order.getId());
     }
 
     List<OrderDTO> list = orders.stream()
@@ -76,6 +77,34 @@ public class OrderApiController {
 
     // 우리가 예상한 결과는 데이터 중복이 존재하면서 4개가 나가야 하는데, Hibernate 6 이 spring3.xx부터 기본이되었는데,
     // 알아서 fetch join을 하게 되면 알아서 최적화 되어 나온다.
+    return list;
+  }
+
+
+  @GetMapping("/v3.1/orders")
+  public List<OrderDTO> orderV3_1() {
+    // 1번
+    List<Order> orders = orderRepository.findAllWithMemberDelivery();
+
+    // orderItem 2번 + Item 2 * 2 = 4번 => 2 + 4 = 6번
+    List<OrderDTO> list = orders.stream()
+            .map(OrderDTO::new)
+            .toList();
+    // 총 7번의 쿼리
+    return list;
+  }
+
+  @GetMapping("/v3.2/orders")
+  public List<OrderDTO> orderV3_page(
+          @RequestParam(value = "offset", defaultValue = "0") int offset,
+          @RequestParam(value = "limit", defaultValue = "10") int limit
+          ) {
+    List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
+
+    List<OrderDTO> list = orders.stream()
+            .map(OrderDTO::new)
+            .toList();
+
     return list;
   }
 
