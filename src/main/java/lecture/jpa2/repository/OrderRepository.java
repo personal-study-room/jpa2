@@ -107,5 +107,23 @@ public class OrderRepository {
                     "join fetch o.delivery d", Order.class
     ).getResultList();
   }
+
+  public List<Order> findAllWithItem() {
+    // 1 : N 에서는 페이징을 함부로 하면 안된다!!!
+    // firstResult/maxResults specified with collection fetch; applying in memory => 메모리에서 paging을 한다는 이야기!!!!
+    // 만약 1 : N : M 인 경우, paging에 매우 유의해야할 것!
+    return em.createQuery(
+                    "select distinct o from Order o " +
+                            "join fetch o.member m " +
+                            "join fetch o.delivery d " +
+                            "join fetch o.orderItems oi " +
+                            "join fetch oi.item i", Order.class
+            )
+            // org.hibernate.orm.query   : firstResult/maxResults specified with collection fetch; applying in memory
+            .setMaxResults(100)
+            .setFirstResult(1)
+            // =============================
+            .getResultList();
+  }
 }
 

@@ -54,6 +54,31 @@ public class OrderApiController {
     return list;
   }
 
+  /**
+   * @결과 분석
+   * @- 현재 spring 3.xx 부터는 hibernate6를 사용하고 있는데, fetch join 시에 이렇게 데이터 중복 문제을 알아서 해결하도록 고안되어 나오고 있다.
+   */
+  @GetMapping("/v3/orders")
+  public List<OrderDTO> orderV3(){
+
+    List<Order> orders = orderRepository.findAllWithItem();
+
+    //order ref= lecture.jpa2.domain.Order@32c8cdba id=1
+    //order ref= lecture.jpa2.domain.Order@652e9703 id=2
+
+    for (Order order : orders) {
+      System.out.println("order ref= " + order + " id=" + order.getId()) ;
+    }
+
+    List<OrderDTO> list = orders.stream()
+            .map(OrderDTO::new)
+            .toList();
+
+    // 우리가 예상한 결과는 데이터 중복이 존재하면서 4개가 나가야 하는데, Hibernate 6 이 spring3.xx부터 기본이되었는데,
+    // 알아서 fetch join을 하게 되면 알아서 최적화 되어 나온다.
+    return list;
+  }
+
   @Data
   static class OrderDTO {
     private Long orderId;
