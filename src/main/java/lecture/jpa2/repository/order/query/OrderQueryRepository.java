@@ -6,7 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -76,7 +77,50 @@ public class OrderQueryRepository {
 
     // 사실상 메모리에 올려두고 하는 작업이라고 보면 된다
     Map<Long, List<OrderItemQueryDTO>> orderItemMap = orderItems.stream()
-            .collect(Collectors.groupingBy(OrderItemQueryDTO::getOrderId));
+            .collect(groupingBy(OrderItemQueryDTO::getOrderId));
     return orderItemMap;
+  }
+
+  public List<OrderQueryDTO> findAllByDtoFlat() {
+
+    List<OrderFlatDTO> resultList = em.createQuery(
+                    "select  distinct new lecture.jpa2.repository.order.query.OrderFlatDTO(o.id, m.name, o.orderDate, o.status, d.address, i.name, oi.orderPrice, oi.count) " +
+                            "from Order o " +
+                            "join o.member m " +
+                            "join o.delivery d " +
+                            "join o.orderItems oi " +
+                            "join oi.item i", OrderFlatDTO.class
+            )
+            .getResultList();
+
+    return resultList.stream()
+            .collect(
+                    groupingBy(
+                            o -> new OrderQueryDTO(
+                                    o.getOrderId(),
+                                    o.getName(),
+                                    o.getOrderDate(),
+                                    o.getOrderStatus(),
+                                    o.getAddress()
+                            ),
+                            mapping(o -> new OrderItemQueryDTO(o.getOrderId(),
+                                    o.getItemName(), o.getOrderPrice(), o.getCount()), toList())
+                    )
+            )
+            .entrySet().stream()
+            .map(
+                    e -> {
+                      OrderQueryDTO orderQueryDTO = new OrderQueryDTO(
+                              e.getKey().getOrderId(),
+                              e.getKey().getName(),
+                              e.getKey().getOrderDate(),
+                              e.getKey().getOrderStatus(),
+                              e.getKey().getAddress()
+                      );
+                      orderQueryDTO.setOrderItems(e.getValue());
+                      return orderQueryDTO;
+                    }
+            )
+            .toList();
   }
 }
