@@ -7,6 +7,8 @@ import lecture.jpa2.domain.OrderItem;
 import lecture.jpa2.domain.OrderStatus;
 import lecture.jpa2.repository.OrderRepository;
 import lecture.jpa2.repository.OrderSearch;
+import lecture.jpa2.repository.order.query.OrderQueryDTO;
+import lecture.jpa2.repository.order.query.OrderQueryRepository;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.List;
 public class OrderApiController {
 
   private final OrderRepository orderRepository;
+  private final OrderQueryRepository orderQueryRepository;
 
 
   @GetMapping("/v1/orders")
@@ -107,6 +110,12 @@ public class OrderApiController {
 
     return list;
   }
+
+  @GetMapping("/v4/orders")
+  public List<OrderQueryDTO> orderV4() {
+    return orderQueryRepository.findOrderQueryDTOs();
+  }
+
 
   @Data
   static class OrderDTO {

@@ -2,7 +2,7 @@ spring:
   datasource:
     # MySQL
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/jpashop?&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/jpashop?&serverTimezone=Asia/Seoul
     username: root
     password: 1234
 
@@ -15,5 +15,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-#        default_batch_fetch_size: 10
+        default_batch_fetch_size: 10
         show_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
